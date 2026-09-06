@@ -54,7 +54,6 @@
     }
 
     .login-box,
-    .reset-box,
     .admin-panel,
     .product-card {
       background: white;
@@ -63,8 +62,7 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
 
-    .login-box,
-    .reset-box {
+    .login-box {
       max-width: 450px;
       margin: 80px auto;
     }
@@ -100,52 +98,15 @@
     }
 
     .login-btn,
-    .add-btn,
-    .reset-btn {
+    .add-btn {
       background: #8b5e58;
       color: white;
       width: 100%;
     }
 
     .login-btn:hover,
-    .add-btn:hover,
-    .reset-btn:hover {
+    .add-btn:hover {
       background: #714944;
-    }
-
-    .forgot-btn {
-      background: none;
-      color: #8b5e58;
-      padding: 8px 0;
-      margin-top: 8px;
-      width: 100%;
-      font-weight: bold;
-    }
-
-    .forgot-btn:hover {
-      text-decoration: underline;
-    }
-
-    .back-btn {
-      background: #eee;
-      color: #555;
-      width: 100%;
-      margin-top: 10px;
-    }
-
-    .back-btn:hover {
-      background: #ddd;
-    }
-
-    .delete-btn {
-      background: #c94c4c;
-      color: white;
-      margin-top: 10px;
-      width: 100%;
-    }
-
-    .delete-btn:hover {
-      background: #a83d3d;
     }
 
     .message {
@@ -167,10 +128,6 @@
     }
 
     .admin-panel {
-      display: none;
-    }
-
-    .reset-box {
       display: none;
     }
 
@@ -267,6 +224,17 @@
       margin-bottom: 15px;
     }
 
+    .delete-btn {
+      background: #c94c4c;
+      color: white;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .delete-btn:hover {
+      background: #a83d3d;
+    }
+
     @media (max-width: 600px) {
 
       header h1 {
@@ -278,7 +246,6 @@
       }
 
       .login-box,
-      .reset-box,
       .admin-panel {
         padding: 18px;
       }
@@ -308,7 +275,7 @@
 
 
   <!-- ================================
-       LOGIN SECTION
+       PASSWORDLESS LOGIN
        ================================ -->
 
   <div
@@ -320,7 +287,11 @@
 
       <h2>Admin Login</h2>
 
-      <form onsubmit="login(event)">
+      <p class="small-text">
+        Enter your admin email. We will send you a secure login link.
+      </p>
+
+      <form onsubmit="sendLoginLink(event)">
 
         <label>Email</label>
 
@@ -328,162 +299,22 @@
           type="email"
           id="email"
           placeholder="Admin email"
-          required
-        >
-
-        <label>Password</label>
-
-        <input
-          type="password"
-          id="password"
-          placeholder="Password"
+          autocomplete="email"
           required
         >
 
         <button
           class="login-btn"
+          id="loginBtn"
           type="submit"
         >
-          Login
+          Send Login Link
         </button>
 
       </form>
-
-
-      <!-- FORGOT PASSWORD -->
-
-      <button
-        class="forgot-btn"
-        onclick="showForgotPassword()"
-      >
-        Forgot Password?
-      </button>
-
 
       <div
         id="loginMessage"
-        class="message"
-      ></div>
-
-    </div>
-
-  </div>
-
-
-  <!-- ================================
-       FORGOT PASSWORD SECTION
-       ================================ -->
-
-  <div
-    id="forgotSection"
-    class="container"
-  >
-
-    <div class="login-box">
-
-      <h2>Reset Password</h2>
-
-      <p class="small-text">
-        Enter your admin email and we will
-        send you a password reset link.
-      </p>
-
-
-      <form onsubmit="sendResetEmail(event)">
-
-        <label>Email</label>
-
-        <input
-          type="email"
-          id="resetEmail"
-          placeholder="Admin email"
-          required
-        >
-
-        <button
-          class="reset-btn"
-          id="resetEmailBtn"
-          type="submit"
-        >
-          Send Reset Link
-        </button>
-
-      </form>
-
-
-      <button
-        class="back-btn"
-        onclick="backToLogin()"
-      >
-        ← Back to Login
-      </button>
-
-
-      <div
-        id="resetMessage"
-        class="message"
-      ></div>
-
-    </div>
-
-  </div>
-
-
-  <!-- ================================
-       NEW PASSWORD SECTION
-       ================================ -->
-
-  <div
-    id="newPasswordSection"
-    class="container"
-  >
-
-    <div class="reset-box">
-
-      <h2>Set New Password</h2>
-
-      <p class="small-text">
-        Enter your new admin password below.
-      </p>
-
-
-      <form onsubmit="updatePassword(event)">
-
-        <label>New Password</label>
-
-        <input
-          type="password"
-          id="newPassword"
-          placeholder="New password"
-          minlength="6"
-          required
-        >
-
-
-        <label>Confirm New Password</label>
-
-        <input
-          type="password"
-          id="confirmPassword"
-          placeholder="Confirm new password"
-          minlength="6"
-          required
-        >
-
-
-        <button
-          class="reset-btn"
-          id="updatePasswordBtn"
-          type="submit"
-        >
-          Update Password
-        </button>
-
-      </form>
-
-
-      <div
-        id="newPasswordMessage"
         class="message"
       ></div>
 
@@ -677,7 +508,7 @@
 
 
   /* =========================================
-     YOUR ADMIN PAGE URL
+     ADMIN PAGE URL
      ========================================= */
 
   const ADMIN_PAGE_URL =
@@ -690,12 +521,6 @@
 
   const loginSection =
     document.getElementById("loginSection");
-
-  const forgotSection =
-    document.getElementById("forgotSection");
-
-  const newPasswordSection =
-    document.getElementById("newPasswordSection");
 
   const adminSection =
     document.getElementById("adminSection");
@@ -741,142 +566,48 @@
 
   function hideAllSections() {
 
-    loginSection.style.display = "none";
-
-    forgotSection.style.display = "none";
-
-    newPasswordSection.style.display = "none";
-
-    adminSection.style.display = "none";
-
-  }
-
-
-  /* =========================================
-     LOGIN
-     ========================================= */
-
-  async function login(event) {
-
-    event.preventDefault();
-
-    const email =
-      document
-        .getElementById("email")
-        .value
-        .trim();
-
-    const password =
-      document
-        .getElementById("password")
-        .value;
-
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-      await supabaseClient.auth.signInWithPassword({
-
-        email: email,
-
-        password: password
-
-      });
-
-
-      if (error) {
-
-        throw error;
-
-      }
-
-
-      showAdminPanel(data.user);
-
-
-    } catch (error) {
-
-      console.error(error);
-
-      showMessage(
-        "loginMessage",
-        error.message ||
-        "Login failed.",
-        "error"
-      );
-
-    }
-
-  }
-
-
-  /* =========================================
-     SHOW FORGOT PASSWORD
-     ========================================= */
-
-  function showForgotPassword() {
-
-    hideAllSections();
-
-    forgotSection.style.display =
-      "block";
-
-
-    const loginEmail =
-      document
-        .getElementById("email")
-        .value
-        .trim();
-
-
-    if (loginEmail) {
-
-      document
-        .getElementById("resetEmail")
-        .value =
-        loginEmail;
-
-    }
-
-  }
-
-
-  /* =========================================
-     BACK TO LOGIN
-     ========================================= */
-
-  function backToLogin() {
-
-    hideAllSections();
-
     loginSection.style.display =
-      "block";
+      "none";
+
+    adminSection.style.display =
+      "none";
 
   }
 
 
   /* =========================================
-     SEND PASSWORD RESET EMAIL
+     SEND PASSWORDLESS LOGIN LINK
      ========================================= */
 
-  async function sendResetEmail(event) {
+  async function sendLoginLink(event) {
 
     event.preventDefault();
 
 
     const email =
       document
-        .getElementById("resetEmail")
+        .getElementById("email")
         .value
         .trim();
 
 
     const button =
-      document
-        .getElementById("resetEmailBtn");
+      document.getElementById(
+        "loginBtn"
+      );
+
+
+    if (!email) {
+
+      showMessage(
+        "loginMessage",
+        "Please enter your admin email.",
+        "error"
+      );
+
+      return;
+
+    }
 
 
     button.disabled = true;
@@ -891,120 +622,26 @@
         error
       } =
       await supabaseClient.auth
-        .resetPasswordForEmail(
-          email,
-          {
-            redirectTo:
-              ADMIN_PAGE_URL
+        .signInWithOtp({
+
+          email: email,
+
+          options: {
+
+            emailRedirectTo:
+              ADMIN_PAGE_URL,
+
+            /*
+             * Only existing Supabase users
+             * can request an admin login link.
+             *
+             * This prevents automatic signup
+             * from this page.
+             */
+
+            shouldCreateUser: false
+
           }
-        );
-
-
-      if (error) {
-
-        throw error;
-
-      }
-
-
-      showMessage(
-        "resetMessage",
-        "✅ Reset link sent! Check your email inbox.",
-        "success"
-      );
-
-
-    } catch (error) {
-
-      console.error(error);
-
-      showMessage(
-        "resetMessage",
-        error.message ||
-        "Could not send reset email.",
-        "error"
-      );
-
-    } finally {
-
-      button.disabled = false;
-
-      button.textContent =
-        "Send Reset Link";
-
-    }
-
-  }
-
-
-  /* =========================================
-     UPDATE PASSWORD
-     ========================================= */
-
-  async function updatePassword(event) {
-
-    event.preventDefault();
-
-
-    const newPassword =
-      document
-        .getElementById("newPassword")
-        .value;
-
-
-    const confirmPassword =
-      document
-        .getElementById("confirmPassword")
-        .value;
-
-
-    if (newPassword.length < 6) {
-
-      showMessage(
-        "newPasswordMessage",
-        "Password must be at least 6 characters.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    if (newPassword !== confirmPassword) {
-
-      showMessage(
-        "newPasswordMessage",
-        "Passwords do not match.",
-        "error"
-      );
-
-      return;
-
-    }
-
-
-    const button =
-      document
-        .getElementById("updatePasswordBtn");
-
-
-    button.disabled = true;
-
-    button.textContent =
-      "Updating...";
-
-
-    try {
-
-      const {
-        error
-      } =
-      await supabaseClient.auth
-        .updateUser({
-
-          password:
-            newPassword
 
         });
 
@@ -1017,29 +654,9 @@
 
 
       showMessage(
-        "newPasswordMessage",
-        "✅ Password updated successfully! You can now login.",
+        "loginMessage",
+        "✅ Login link sent! Check your email inbox and click the link to open the Admin Panel.",
         "success"
-      );
-
-
-      setTimeout(
-        async () => {
-
-          await supabaseClient.auth.signOut();
-
-          document
-            .getElementById("newPassword")
-            .value = "";
-
-          document
-            .getElementById("confirmPassword")
-            .value = "";
-
-          backToLogin();
-
-        },
-        2000
       );
 
 
@@ -1047,10 +664,11 @@
 
       console.error(error);
 
+
       showMessage(
-        "newPasswordMessage",
+        "loginMessage",
         error.message ||
-        "Could not update password.",
+        "Could not send login link.",
         "error"
       );
 
@@ -1059,7 +677,7 @@
       button.disabled = false;
 
       button.textContent =
-        "Update Password";
+        "Send Login Link";
 
     }
 
@@ -1073,6 +691,7 @@
   function showAdminPanel(user) {
 
     hideAllSections();
+
 
     adminSection.style.display =
       "block";
@@ -1113,6 +732,13 @@
 
       console.error(error);
 
+      showMessage(
+        "loginMessage",
+        error.message ||
+        "Logout failed.",
+        "error"
+      );
+
       return;
 
     }
@@ -1142,8 +768,9 @@
 
 
     document
-      .getElementById("password")
-      .value = "";
+      .getElementById("loginMessage")
+      .style.display =
+      "none";
 
   }
 
@@ -1154,23 +781,50 @@
 
   async function checkSession() {
 
-    const {
-      data
-    } =
-    await supabaseClient.auth.getSession();
+    try {
+
+      const {
+        data,
+        error
+      } =
+      await supabaseClient.auth.getSession();
 
 
-    const session =
-      data.session;
+      if (error) {
+
+        throw error;
+
+      }
 
 
-    if (session && session.user) {
+      const session =
+        data.session;
 
-      showAdminPanel(
+
+      if (
+        session &&
         session.user
-      );
+      ) {
 
-    } else {
+        showAdminPanel(
+          session.user
+        );
+
+      } else {
+
+        hideAllSections();
+
+        loginSection.style.display =
+          "block";
+
+        logoutBtn.style.display =
+          "none";
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
 
       hideAllSections();
 
@@ -1193,13 +847,36 @@
     .onAuthStateChange(
       (event, session) => {
 
+        console.log(
+          "Auth event:",
+          event
+        );
+
+
+        /*
+         * When user clicks the email
+         * login link, Supabase creates
+         * the authenticated session.
+         */
+
         if (
-          event === "PASSWORD_RECOVERY"
+          session &&
+          session.user
+        ) {
+
+          showAdminPanel(
+            session.user
+          );
+
+        }
+
+        else if (
+          event === "SIGNED_OUT"
         ) {
 
           hideAllSections();
 
-          newPasswordSection.style.display =
+          loginSection.style.display =
             "block";
 
           logoutBtn.style.display =
