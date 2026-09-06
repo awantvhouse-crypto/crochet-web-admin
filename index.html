@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Crochet Web Admin</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f8f3f0;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #8b5e58;
+      color: white;
+      padding: 18px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    header h1 {
+      font-size: 24px;
+    }
+
+    #logoutBtn {
+      background: white;
+      color: #8b5e58;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      display: none;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 1100px;
+      margin: 30px auto;
+    }
+
+    .login-box,
+    .admin-panel,
+    .product-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .login-box {
+      max-width: 450px;
+      margin: 80px auto;
+    }
+
+    h2 {
+      color: #8b5e58;
+      margin-bottom: 20px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #8b5e58;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .login-btn,
+    .add-btn {
+      background: #8b5e58;
+      color: white;
+      width: 100%;
+    }
+
+    .login-btn:hover,
+    .add-btn:hover {
+      background: #714944;
+    }
+
+    .delete-btn {
+      background: #c94c4c;
+      color: white;
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .delete-btn:hover {
+      background: #a83d3d;
+    }
+
+    .message {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .success {
+      background: #e2f5e7;
+      color: #26733a;
+    }
+
+    .error {
+      background: #fde5e5;
+      color: #a32929;
+    }
+
+    .admin-panel {
+      display: none;
+    }
+
+    .form-section {
+      margin-bottom: 35px;
+    }
+
+    .form-section h2 {
+      margin-bottom: 15px;
+    }
+
+    .products-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 15px;
+    }
+
+    .refresh-btn {
+      background: #eee;
+      color: #555;
+    }
+
+    .refresh-btn:hover {
+      background: #ddd;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      padding: 15px;
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #eee;
+    }
+
+    .product-card h3 {
+      margin: 12px 0 6px;
+      color: #8b5e58;
+    }
+
+    .product-card p {
+      margin: 5px 0;
+      color: #666;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #777;
+      background: white;
+      border-radius: 15px;
+    }
+
+    .user-info {
+      background: #f4ece8;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #6d4944;
+      font-size: 14px;
+    }
+
+    .file-note {
+      font-size: 12px;
+      color: #777;
+      margin-top: -8px;
+      margin-bottom: 15px;
+    }
+
+    .preview {
+      display: none;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 19px;
+      }
+
+      .container {
+        width: 95%;
+      }
+
+      .login-box,
+      .admin-panel {
+        padding: 18px;
+      }
+
+      .products-title {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>🧶 Crochet Web Admin</h1>
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+  </header>
+
+
+  <!-- LOGIN -->
+  <div id="loginSection" class="container">
+
+    <div class="login-box">
+
+      <h2>Admin Login</h2>
+
+      <form onsubmit="login(event)">
+
+        <label>Email</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="Admin email"
+          required
+        >
+
+        <label>Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+        >
+
+        <button class="login-btn" type="submit">
+          Login
+        </button>
+
+      </form>
+
+      <div id="loginMessage" class="message"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ADMIN PANEL -->
+  <div id="adminSection" class="container">
+
+    <div class="admin-panel">
+
+      <div class="user-info">
+        Logged in as:
+        <strong id="adminEmail"></strong>
+      </div>
+
+
+      <!-- ADD PRODUCT -->
+      <div class="form-section">
+
+        <h2>➕ Add New Product</h2>
+
+        <form onsubmit="addProduct(event)">
+
+          <label>Product Name</label>
+
+          <input
+            type="text"
+            id="productName"
+            placeholder="Example: Crochet Flower"
+            required
+          >
+
+
+          <label>Price</label>
+
+          <input
+            type="number"
+            id="productPrice"
+            placeholder="Example: 1500"
+            min="0"
+            step="0.01"
+            required
+          >
+
+
+          <label>Category</label>
+
+          <select id="productCategory" required>
+
+            <option value="">
+              Select Category
+            </option>
+
+            <option value="Bags">
+              Bags
+            </option>
+
+            <option value="Flowers">
+              Flowers
+            </option>
+
+            <option value="Keychains">
+              Keychains
+            </option>
+
+            <option value="Toys">
+              Toys
+            </option>
+
+            <option value="Accessories">
+              Accessories
+            </option>
+
+            <option value="Home Decor">
+              Home Decor
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
+
+          </select>
+
+
+          <label>Product Image</label>
+
+          <input
+            type="file"
+            id="productImage"
+            accept="image/*"
+            onchange="previewImage(event)"
+            required
+          >
+
+          <div class="file-note">
+            Maximum image size: 2 MB
+          </div>
+
+          <img
+            id="imagePreview"
+            class="preview"
+            alt="Image preview"
+          >
+
+
+          <button
+            type="submit"
+            class="add-btn"
+            id="addProductBtn"
+          >
+            Add Product
+          </button>
+
+        </form>
+
+        <div id="productMessage" class="message"></div>
+
+      </div>
+
+
+      <!-- PRODUCTS -->
+      <div>
+
+        <div class="products-title">
+
+          <h2>
+            📦 Your Products
+          </h2>
+
+          <button
+            class="refresh-btn"
+            onclick="loadAdminProducts()"
+          >
+            🔄 Refresh
+          </button>
+
+        </div>
+
+        <div
+          id="productsGrid"
+          class="products-grid"
+        ></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+<script>
+
+  /* =========================================
+     SUPABASE CONNECTION
+     ========================================= */
+
+  const SUPABASE_URL =
+    "https://ocwtzuwjnceushnytira.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_zMT-DSHVHl0vRiAxAQvmA_YnbWjaOT";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+
+  /* =========================================
+     PAGE ELEMENTS
+     ========================================= */
+
+  const loginSection =
+    document.getElementById("loginSection");
+
+  const adminSection =
+    document.getElementById("adminSection");
+
+  const logoutBtn =
+    document.getElementById("logoutBtn");
+
+  const adminEmail =
+    document.getElementById("adminEmail");
+
+  const productsGrid =
+    document.getElementById("productsGrid");
+
+
+  /* =========================================
+     SHOW MESSAGE
+     ========================================= */
+
+  function showMessage(
+    elementId,
+    text,
+    type
+  ) {
+
+    const element =
+      document.getElementById(elementId);
+
+    element.textContent = text;
+
+    element.className =
+      "message " + type;
+
+    element.style.display = "block";
+
+    setTimeout(() => {
+
+      element.style.display = "none";
+
+    }, 5000);
+  }
+
+
+  /* =========================================
+     LOGIN
+     ========================================= */
+
+  async function login(event) {
+
+    event.preventDefault();
+
+    const email =
+      document.getElementById("email").value.trim();
+
+    const password =
+      document.getElementById("password").value;
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      showAdminPanel(data.user);
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "loginMessage",
+        error.message || "Login failed.",
+        "error"
+      );
+
+    }
+
+  }
+
+
+  /* =========================================
+     SHOW ADMIN PANEL
+     ========================================= */
+
+  function showAdminPanel(user) {
+
+    loginSection.style.display = "none";
+
+    adminSection.style.display = "block";
+
+    adminSection
+      .querySelector(".admin-panel")
+      .style.display = "block";
+
+    logoutBtn.style.display = "block";
+
+    adminEmail.textContent =
+      user.email || "";
+
+    loadAdminProducts();
+
+  }
+
+
+  /* =========================================
+     LOGOUT
+     ========================================= */
+
+  async function logout() {
+
+    const {
+      error
+    } =
+    await supabaseClient.auth.signOut();
+
+    if (error) {
+
+      console.error(error);
+
+      return;
+
+    }
+
+    adminSection.style.display = "none";
+
+    adminSection
+      .querySelector(".admin-panel")
+      .style.display = "none";
+
+    loginSection.style.display = "block";
+
+    logoutBtn.style.display = "none";
+
+    document.getElementById("email").value = "";
+
+    document.getElementById("password").value = "";
+
+  }
+
+
+  /* =========================================
+     CHECK CURRENT SESSION
+     ========================================= */
+
+  async function checkSession() {
+
+    const {
+      data
+    } =
+    await supabaseClient.auth.getSession();
+
+    const session =
+      data.session;
+
+    if (session && session.user) {
+
+      showAdminPanel(session.user);
+
+    } else {
+
+      loginSection.style.display = "block";
+
+      adminSection.style.display = "none";
+
+      logoutBtn.style.display = "none";
+
+    }
+
+  }
+
+
+  /* =========================================
+     IMAGE PREVIEW
+     ========================================= */
+
+  function previewImage(event) {
+
+    const file =
+      event.target.files[0];
+
+    const preview =
+      document.getElementById("imagePreview");
+
+    if (!file) {
+
+      preview.style.display = "none";
+
+      return;
+
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+
+      showMessage(
+        "productMessage",
+        "Image must be smaller than 2 MB.",
+        "error"
+      );
+
+      event.target.value = "";
+
+      preview.style.display = "none";
+
+      return;
+
+    }
+
+    const reader =
+      new FileReader();
+
+    reader.onload = function(e) {
+
+      preview.src =
+        e.target.result;
+
+      preview.style.display =
+        "block";
+
+    };
+
+    reader.readAsDataURL(file);
+
+  }
+
+
+  /* =========================================
+     CONVERT IMAGE TO BASE64
+     ========================================= */
+
+  function imageToBase64(file) {
+
+    return new Promise(
+      (resolve, reject) => {
+
+        const reader =
+          new FileReader();
+
+        reader.onload =
+          () => resolve(reader.result);
+
+        reader.onerror =
+          reject;
+
+        reader.readAsDataURL(file);
+
+      }
+    );
+
+  }
+
+
+  /* =========================================
+     ADD PRODUCT
+     ========================================= */
+
+  async function addProduct(event) {
+
+    event.preventDefault();
+
+    const button =
+      document.getElementById("addProductBtn");
+
+    button.disabled = true;
+
+    button.textContent =
+      "Adding Product...";
+
+
+    try {
+
+      /* Get logged-in user */
+
+      const {
+        data: userData,
+        error: userError
+      } =
+      await supabaseClient.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      const user =
+        userData.user;
+
+      if (!user) {
+
+        throw new Error(
+          "Please login first."
+        );
+
+      }
+
+
+      /* Get form values */
+
+      const name =
+        document
+          .getElementById("productName")
+          .value
+          .trim();
+
+      const price =
+        parseFloat(
+          document
+            .getElementById("productPrice")
+            .value
+        );
+
+      const category =
+        document
+          .getElementById("productCategory")
+          .value;
+
+      const imageFile =
+        document
+          .getElementById("productImage")
+          .files[0];
+
+
+      /* Validate */
+
+      if (!name) {
+        throw new Error(
+          "Please enter product name."
+        );
+      }
+
+      if (isNaN(price)) {
+        throw new Error(
+          "Please enter a valid price."
+        );
+      }
+
+      if (!category) {
+        throw new Error(
+          "Please select a category."
+        );
+      }
+
+      if (!imageFile) {
+        throw new Error(
+          "Please select an image."
+        );
+      }
+
+      if (imageFile.size > 2 * 1024 * 1024) {
+        throw new Error(
+          "Image must be smaller than 2 MB."
+        );
+      }
+
+
+      /* Convert image */
+
+      const imageUrl =
+        await imageToBase64(imageFile);
+
+
+      /* Insert product */
+
+      const {
+        data,
+        error
+      } =
+      await supabaseClient
+        .from("products")
+        .insert([{
+
+          name: name,
+
+          price: price,
+
+          category: category,
+
+          image_url: imageUrl,
+
+          rating: 0,
+
+          review_count: 0,
+
+          user_id: user.id
+
+        }])
+        .select();
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      /* Success */
+
+      showMessage(
+        "productMessage",
+        "✅ Product added successfully!",
+        "success"
+      );
+
+
+      /* Clear form */
+
+      document
+        .getElementById("productName")
+        .value = "";
+
+      document
+        .getElementById("productPrice")
+        .value = "";
+
+      document
+        .getElementById("productCategory")
+        .value = "";
+
+      document
+        .getElementById("productImage")
+        .value = "";
+
+      document
+        .getElementById("imagePreview")
+        .style.display = "none";
+
+
+      /* Reload products */
+
+      loadAdminProducts();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "productMessage",
+        error.message ||
+        "Could not add product.",
+        "error"
+      );
+
+    } finally {
+
+      button.disabled = false;
+
+      button.textContent =
+        "Add Product";
+
+    }
+
+  }
+
+
+  /* =========================================
+     LOAD ADMIN PRODUCTS
+     ========================================= */
+
+  async function loadAdminProducts() {
+
+    productsGrid.innerHTML =
+      "<div class='empty'>Loading products...</div>";
+
+
+    try {
+
+      const {
+        data: userData,
+        error: userError
+      } =
+      await supabaseClient.auth.getUser();
+
+      if (userError) {
+        throw userError;
+      }
+
+      const user =
+        userData.user;
+
+      if (!user) {
+
+        productsGrid.innerHTML =
+          "<div class='empty'>Please login.</div>";
+
+        return;
+
+      }
+
+
+      const {
+        data: products,
+        error
+      } =
+      await supabaseClient
+        .from("products")
+        .select("*")
+        .eq("user_id", user.id)
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      if (!products ||
+          products.length === 0) {
+
+        productsGrid.innerHTML = `
+          <div class="empty">
+            No products added yet.
+          </div>
+        `;
+
+        return;
+
+      }
+
+
+      productsGrid.innerHTML = "";
+
+
+      products.forEach(product => {
+
+        const card =
+          document.createElement("div");
+
+        card.className =
+          "product-card";
+
+
+        const image =
+          product.image_url ||
+          "";
+
+
+        card.innerHTML = `
+
+          <img
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(product.name || "Product")}"
+          >
+
+          <h3>
+            ${escapeHtml(product.name || "Unnamed Product")}
+          </h3>
+
+          <p>
+            <strong>
+              Price:
+            </strong>
+            Rs. ${Number(product.price || 0).toLocaleString()}
+          </p>
+
+          <p>
+            <strong>
+              Category:
+            </strong>
+            ${escapeHtml(product.category || "Other")}
+          </p>
+
+          <button
+            class="delete-btn"
+            onclick="deleteProduct('${product.id}')"
+          >
+            🗑️ Delete Product
+          </button>
+
+        `;
+
+
+        productsGrid.appendChild(card);
+
+      });
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      productsGrid.innerHTML = `
+        <div class="empty">
+          Could not load products.
+          <br><br>
+          ${escapeHtml(error.message || "")}
+        </div>
+      `;
+
+    }
+
+  }
+
+
+  /* =========================================
+     DELETE PRODUCT
+     ========================================= */
+
+  async function deleteProduct(productId) {
+
+    const confirmed =
+      confirm(
+        "Are you sure you want to delete this product?"
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+
+    try {
+
+      const {
+        error
+      } =
+      await supabaseClient
+        .from("products")
+        .delete()
+        .eq("id", productId);
+
+
+      if (error) {
+        throw error;
+      }
+
+
+      showMessage(
+        "productMessage",
+        "✅ Product deleted successfully.",
+        "success"
+      );
+
+
+      loadAdminProducts();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "productMessage",
+        error.message ||
+        "Could not delete product.",
+        "error"
+      );
+
+    }
+
+  }
+
+
+  /* =========================================
+     ESCAPE HTML
+     ========================================= */
+
+  function escapeHtml(value) {
+
+    if (value === null ||
+        value === undefined) {
+
+      return "";
+
+    }
+
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  /* =========================================
+     START
+     ========================================= */
+
+  checkSession();
+
+</script>
+
+</body>
+</html>
