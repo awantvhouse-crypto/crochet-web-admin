@@ -98,6 +98,7 @@
     }
 
     .login-btn,
+    .verify-btn,
     .add-btn {
       background: #8b5e58;
       color: white;
@@ -105,8 +106,20 @@
     }
 
     .login-btn:hover,
+    .verify-btn:hover,
     .add-btn:hover {
       background: #714944;
+    }
+
+    .secondary-btn {
+      background: #eee;
+      color: #555;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .secondary-btn:hover {
+      background: #ddd;
     }
 
     .message {
@@ -128,6 +141,10 @@
     }
 
     .admin-panel {
+      display: none;
+    }
+
+    #otpSection {
       display: none;
     }
 
@@ -235,6 +252,13 @@
       background: #a83d3d;
     }
 
+    .otp-input {
+      text-align: center;
+      letter-spacing: 8px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
     @media (max-width: 600px) {
 
       header h1 {
@@ -260,231 +284,292 @@
 
 <body>
 
-  <header>
+<header>
 
-    <h1>🧶 Crochet Web Admin</h1>
+  <h1>🧶 Crochet Web Admin</h1>
+
+  <button
+    id="logoutBtn"
+    onclick="logout()"
+  >
+    Logout
+  </button>
+
+</header>
+
+
+<!-- =========================================
+     EMAIL LOGIN
+     ========================================= -->
+
+<div
+  id="loginSection"
+  class="container"
+>
+
+  <div class="login-box">
+
+    <h2>Admin Login</h2>
+
+    <p class="small-text">
+      Enter your admin email. A verification code will be sent to your email.
+    </p>
+
+    <form onsubmit="sendOtp(event)">
+
+      <label>Email</label>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Admin email"
+        autocomplete="email"
+        required
+      >
+
+      <button
+        class="login-btn"
+        id="sendOtpBtn"
+        type="submit"
+      >
+        Send Verification Code
+      </button>
+
+    </form>
+
+    <div
+      id="loginMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================
+     OTP VERIFICATION
+     ========================================= -->
+
+<div
+  id="otpSection"
+  class="container"
+>
+
+  <div class="login-box">
+
+    <h2>Verify Email</h2>
+
+    <p class="small-text">
+      We sent a verification code to:
+      <br>
+      <strong id="otpEmail"></strong>
+    </p>
+
+    <form onsubmit="verifyOtp(event)">
+
+      <label>Verification Code</label>
+
+      <input
+        type="text"
+        id="otpCode"
+        class="otp-input"
+        placeholder="123456"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        maxlength="6"
+        required
+      >
+
+      <button
+        class="verify-btn"
+        id="verifyOtpBtn"
+        type="submit"
+      >
+        Verify & Open Admin
+      </button>
+
+    </form>
 
     <button
-      id="logoutBtn"
-      onclick="logout()"
+      class="secondary-btn"
+      onclick="backToEmail()"
     >
-      Logout
+      ← Change Email
     </button>
 
-  </header>
+    <div
+      id="otpMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+</div>
 
 
-  <!-- ================================
-       PASSWORDLESS LOGIN
-       ================================ -->
+<!-- =========================================
+     ADMIN PANEL
+     ========================================= -->
 
-  <div
-    id="loginSection"
-    class="container"
-  >
+<div
+  id="adminSection"
+  class="container"
+>
 
-    <div class="login-box">
+  <div class="admin-panel">
 
-      <h2>Admin Login</h2>
+    <div class="user-info">
 
-      <p class="small-text">
-        Enter your admin email. We will send you a secure login link.
-      </p>
+      Logged in as:
+      <strong id="adminEmail"></strong>
 
-      <form onsubmit="sendLoginLink(event)">
+    </div>
 
-        <label>Email</label>
+
+    <!-- ADD PRODUCT -->
+
+    <div class="form-section">
+
+      <h2>➕ Add New Product</h2>
+
+      <form onsubmit="addProduct(event)">
+
+        <label>Product Name</label>
 
         <input
-          type="email"
-          id="email"
-          placeholder="Admin email"
-          autocomplete="email"
+          type="text"
+          id="productName"
+          placeholder="Example: Crochet Flower"
           required
         >
 
-        <button
-          class="login-btn"
-          id="loginBtn"
-          type="submit"
+
+        <label>Price</label>
+
+        <input
+          type="number"
+          id="productPrice"
+          placeholder="Example: 1500"
+          min="0"
+          step="0.01"
+          required
         >
-          Send Login Link
+
+
+        <label>Category</label>
+
+        <select
+          id="productCategory"
+          required
+        >
+
+          <option value="">
+            Select Category
+          </option>
+
+          <option value="Bags">
+            Bags
+          </option>
+
+          <option value="Flowers">
+            Flowers
+          </option>
+
+          <option value="Keychains">
+            Keychains
+          </option>
+
+          <option value="Toys">
+            Toys
+          </option>
+
+          <option value="Accessories">
+            Accessories
+          </option>
+
+          <option value="Home Decor">
+            Home Decor
+          </option>
+
+          <option value="Other">
+            Other
+          </option>
+
+        </select>
+
+
+        <label>Product Image</label>
+
+        <input
+          type="file"
+          id="productImage"
+          accept="image/*"
+          onchange="previewImage(event)"
+          required
+        >
+
+        <div class="file-note">
+          Maximum image size: 2 MB
+        </div>
+
+
+        <img
+          id="imagePreview"
+          class="preview"
+          alt="Image preview"
+        >
+
+
+        <button
+          type="submit"
+          class="add-btn"
+          id="addProductBtn"
+        >
+          Add Product
         </button>
 
       </form>
 
+
       <div
-        id="loginMessage"
+        id="productMessage"
         class="message"
+      ></div>
+
+    </div>
+
+
+    <!-- PRODUCTS -->
+
+    <div>
+
+      <div class="products-title">
+
+        <h2>
+          📦 Your Products
+        </h2>
+
+        <button
+          class="refresh-btn"
+          onclick="loadAdminProducts()"
+        >
+          🔄 Refresh
+        </button>
+
+      </div>
+
+
+      <div
+        id="productsGrid"
+        class="products-grid"
       ></div>
 
     </div>
 
   </div>
 
-
-  <!-- ================================
-       ADMIN PANEL
-       ================================ -->
-
-  <div
-    id="adminSection"
-    class="container"
-  >
-
-    <div class="admin-panel">
-
-      <div class="user-info">
-
-        Logged in as:
-        <strong id="adminEmail"></strong>
-
-      </div>
-
-
-      <!-- ADD PRODUCT -->
-
-      <div class="form-section">
-
-        <h2>➕ Add New Product</h2>
-
-        <form onsubmit="addProduct(event)">
-
-          <label>Product Name</label>
-
-          <input
-            type="text"
-            id="productName"
-            placeholder="Example: Crochet Flower"
-            required
-          >
-
-
-          <label>Price</label>
-
-          <input
-            type="number"
-            id="productPrice"
-            placeholder="Example: 1500"
-            min="0"
-            step="0.01"
-            required
-          >
-
-
-          <label>Category</label>
-
-          <select
-            id="productCategory"
-            required
-          >
-
-            <option value="">
-              Select Category
-            </option>
-
-            <option value="Bags">
-              Bags
-            </option>
-
-            <option value="Flowers">
-              Flowers
-            </option>
-
-            <option value="Keychains">
-              Keychains
-            </option>
-
-            <option value="Toys">
-              Toys
-            </option>
-
-            <option value="Accessories">
-              Accessories
-            </option>
-
-            <option value="Home Decor">
-              Home Decor
-            </option>
-
-            <option value="Other">
-              Other
-            </option>
-
-          </select>
-
-
-          <label>Product Image</label>
-
-          <input
-            type="file"
-            id="productImage"
-            accept="image/*"
-            onchange="previewImage(event)"
-            required
-          >
-
-          <div class="file-note">
-            Maximum image size: 2 MB
-          </div>
-
-
-          <img
-            id="imagePreview"
-            class="preview"
-            alt="Image preview"
-          >
-
-
-          <button
-            type="submit"
-            class="add-btn"
-            id="addProductBtn"
-          >
-            Add Product
-          </button>
-
-        </form>
-
-
-        <div
-          id="productMessage"
-          class="message"
-        ></div>
-
-      </div>
-
-
-      <!-- PRODUCTS -->
-
-      <div>
-
-        <div class="products-title">
-
-          <h2>
-            📦 Your Products
-          </h2>
-
-          <button
-            class="refresh-btn"
-            onclick="loadAdminProducts()"
-          >
-            🔄 Refresh
-          </button>
-
-        </div>
-
-
-        <div
-          id="productsGrid"
-          class="products-grid"
-        ></div>
-
-      </div>
-
-    </div>
-
-  </div>
+</div>
 
 
 <script>
@@ -508,11 +593,13 @@
 
 
   /* =========================================
-     ADMIN PAGE URL
+     YOUR ADMIN EMAIL
+     
+     CHANGE THIS TO YOUR REAL EMAIL
      ========================================= */
 
-  const ADMIN_PAGE_URL =
-    "https://awantvhouse-crypto.github.io/crochet-web/admin.html";
+  const ADMIN_EMAIL =
+    "YOUR_ADMIN_EMAIL@example.com";
 
 
   /* =========================================
@@ -521,6 +608,9 @@
 
   const loginSection =
     document.getElementById("loginSection");
+
+  const otpSection =
+    document.getElementById("otpSection");
 
   const adminSection =
     document.getElementById("adminSection");
@@ -533,6 +623,9 @@
 
   const productsGrid =
     document.getElementById("productsGrid");
+
+
+  let pendingEmail = "";
 
 
   /* =========================================
@@ -561,12 +654,15 @@
 
 
   /* =========================================
-     HIDE ALL MAIN SECTIONS
+     HIDE ALL SECTIONS
      ========================================= */
 
   function hideAllSections() {
 
     loginSection.style.display =
+      "none";
+
+    otpSection.style.display =
       "none";
 
     adminSection.style.display =
@@ -576,10 +672,10 @@
 
 
   /* =========================================
-     SEND PASSWORDLESS LOGIN LINK
+     SEND OTP
      ========================================= */
 
-  async function sendLoginLink(event) {
+  async function sendOtp(event) {
 
     event.preventDefault();
 
@@ -588,20 +684,30 @@
       document
         .getElementById("email")
         .value
-        .trim();
+        .trim()
+        .toLowerCase();
 
 
     const button =
       document.getElementById(
-        "loginBtn"
+        "sendOtpBtn"
       );
 
 
-    if (!email) {
+    /*
+     * IMPORTANT:
+     * Only your fixed admin email
+     * is allowed.
+     */
+
+    if (
+      email !==
+      ADMIN_EMAIL.toLowerCase()
+    ) {
 
       showMessage(
         "loginMessage",
-        "Please enter your admin email.",
+        "❌ This email is not authorized for Admin access.",
         "error"
       );
 
@@ -610,7 +716,12 @@
     }
 
 
-    button.disabled = true;
+    pendingEmail =
+      email;
+
+
+    button.disabled =
+      true;
 
     button.textContent =
       "Sending...";
@@ -628,18 +739,8 @@
 
           options: {
 
-            emailRedirectTo:
-              ADMIN_PAGE_URL,
-
-            /*
-             * Only existing Supabase users
-             * can request an admin login link.
-             *
-             * This prevents automatic signup
-             * from this page.
-             */
-
-            shouldCreateUser: false
+            shouldCreateUser:
+              false
 
           }
 
@@ -653,11 +754,32 @@
       }
 
 
+      document
+        .getElementById(
+          "otpEmail"
+        )
+        .textContent =
+        email;
+
+
+      hideAllSections();
+
+      otpSection.style.display =
+        "block";
+
+
       showMessage(
-        "loginMessage",
-        "✅ Login link sent! Check your email inbox and click the link to open the Admin Panel.",
+        "otpMessage",
+        "✅ Verification code sent. Check your email inbox.",
         "success"
       );
+
+
+      document
+        .getElementById(
+          "otpCode"
+        )
+        .focus();
 
 
     } catch (error) {
@@ -668,18 +790,196 @@
       showMessage(
         "loginMessage",
         error.message ||
-        "Could not send login link.",
+        "Could not send verification code.",
         "error"
       );
 
     } finally {
 
-      button.disabled = false;
+      button.disabled =
+        false;
 
       button.textContent =
-        "Send Login Link";
+        "Send Verification Code";
 
     }
+
+  }
+
+
+  /* =========================================
+     VERIFY OTP
+     ========================================= */
+
+  async function verifyOtp(event) {
+
+    event.preventDefault();
+
+
+    const code =
+      document
+        .getElementById("otpCode")
+        .value
+        .trim();
+
+
+    const button =
+      document.getElementById(
+        "verifyOtpBtn"
+      );
+
+
+    if (!pendingEmail) {
+
+      showMessage(
+        "otpMessage",
+        "Please enter your email again.",
+        "error"
+      );
+
+      backToEmail();
+
+      return;
+
+    }
+
+
+    if (!/^\d{6}$/.test(code)) {
+
+      showMessage(
+        "otpMessage",
+        "Please enter the 6-digit verification code.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "Verifying...";
+
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+      await supabaseClient.auth
+        .verifyOtp({
+
+          email:
+            pendingEmail,
+
+          token:
+            code,
+
+          type:
+            "email"
+
+        });
+
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      if (
+        !data ||
+        !data.user
+      ) {
+
+        throw new Error(
+          "Email verification failed."
+        );
+
+      }
+
+
+      /*
+       * Extra protection:
+       * Make absolutely sure the
+       * verified account is the
+       * authorized admin email.
+       */
+
+      if (
+        data.user.email.toLowerCase() !==
+        ADMIN_EMAIL.toLowerCase()
+      ) {
+
+        await supabaseClient.auth.signOut();
+
+        throw new Error(
+          "This email is not authorized for Admin access."
+        );
+
+      }
+
+
+      showAdminPanel(
+        data.user
+      );
+
+
+    } catch (error) {
+
+      console.error(error);
+
+
+      showMessage(
+        "otpMessage",
+        error.message ||
+        "Invalid or expired verification code.",
+        "error"
+      );
+
+    } finally {
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "Verify & Open Admin";
+
+    }
+
+  }
+
+
+  /* =========================================
+     BACK TO EMAIL
+     ========================================= */
+
+  function backToEmail() {
+
+    hideAllSections();
+
+    loginSection.style.display =
+      "block";
+
+
+    document
+      .getElementById(
+        "otpCode"
+      )
+      .value = "";
+
+
+    document
+      .getElementById(
+        "otpMessage"
+      )
+      .style.display =
+      "none";
 
   }
 
@@ -689,6 +989,24 @@
      ========================================= */
 
   function showAdminPanel(user) {
+
+    /*
+     * Final security check
+     */
+
+    if (
+      !user ||
+      !user.email ||
+      user.email.toLowerCase() !==
+      ADMIN_EMAIL.toLowerCase()
+    ) {
+
+      logout();
+
+      return;
+
+    }
+
 
     hideAllSections();
 
@@ -708,7 +1026,7 @@
 
 
     adminEmail.textContent =
-      user.email || "";
+      user.email;
 
 
     loadAdminProducts();
@@ -722,26 +1040,18 @@
 
   async function logout() {
 
-    const {
-      error
-    } =
-    await supabaseClient.auth.signOut();
+    try {
 
+      await supabaseClient.auth.signOut();
 
-    if (error) {
+    } catch (error) {
 
       console.error(error);
 
-      showMessage(
-        "loginMessage",
-        error.message ||
-        "Logout failed.",
-        "error"
-      );
-
-      return;
-
     }
+
+
+    pendingEmail = "";
 
 
     adminSection.style.display =
@@ -751,6 +1061,10 @@
     adminSection
       .querySelector(".admin-panel")
       .style.display =
+      "none";
+
+
+    otpSection.style.display =
       "none";
 
 
@@ -764,6 +1078,11 @@
 
     document
       .getElementById("email")
+      .value = "";
+
+
+    document
+      .getElementById("otpCode")
       .value = "";
 
 
@@ -806,9 +1125,31 @@
         session.user
       ) {
 
-        showAdminPanel(
-          session.user
-        );
+        /*
+         * Make sure current session
+         * belongs to the authorized email.
+         */
+
+        if (
+          session.user.email &&
+          session.user.email.toLowerCase() ===
+          ADMIN_EMAIL.toLowerCase()
+        ) {
+
+          showAdminPanel(
+            session.user
+          );
+
+        } else {
+
+          await supabaseClient.auth.signOut();
+
+          hideAllSections();
+
+          loginSection.style.display =
+            "block";
+
+        }
 
       } else {
 
@@ -853,20 +1194,26 @@
         );
 
 
-        /*
-         * When user clicks the email
-         * login link, Supabase creates
-         * the authenticated session.
-         */
-
         if (
           session &&
           session.user
         ) {
 
-          showAdminPanel(
-            session.user
-          );
+          if (
+            session.user.email &&
+            session.user.email.toLowerCase() ===
+            ADMIN_EMAIL.toLowerCase()
+          ) {
+
+            showAdminPanel(
+              session.user
+            );
+
+          } else {
+
+            supabaseClient.auth.signOut();
+
+          }
 
         }
 
@@ -926,7 +1273,8 @@
       );
 
 
-      event.target.value = "";
+      event.target.value =
+        "";
 
       preview.style.display =
         "none";
@@ -1005,7 +1353,8 @@
       );
 
 
-    button.disabled = true;
+    button.disabled =
+      true;
 
     button.textContent =
       "Adding Product...";
@@ -1035,6 +1384,24 @@
 
         throw new Error(
           "Please login first."
+        );
+
+      }
+
+
+      /*
+       * Make sure only the
+       * authorized admin can add.
+       */
+
+      if (
+        !user.email ||
+        user.email.toLowerCase() !==
+        ADMIN_EMAIL.toLowerCase()
+      ) {
+
+        throw new Error(
+          "You are not authorized."
         );
 
       }
@@ -1130,26 +1497,32 @@
 
 
       const {
-        data,
         error
       } =
       await supabaseClient
         .from("products")
         .insert([{
 
-          name: name,
+          name:
+            name,
 
-          price: price,
+          price:
+            price,
 
-          category: category,
+          category:
+            category,
 
-          image_url: imageUrl,
+          image_url:
+            imageUrl,
 
-          rating: 0,
+          rating:
+            0,
 
-          review_count: 0,
+          review_count:
+            0,
 
-          user_id: user.id
+          user_id:
+            user.id
 
         }])
         .select();
@@ -1222,7 +1595,8 @@
 
     } finally {
 
-      button.disabled = false;
+      button.disabled =
+        false;
 
       button.textContent =
         "Add Product";
@@ -1272,6 +1646,20 @@
       }
 
 
+      if (
+        !user.email ||
+        user.email.toLowerCase() !==
+        ADMIN_EMAIL.toLowerCase()
+      ) {
+
+        productsGrid.innerHTML =
+          "<div class='empty'>You are not authorized.</div>";
+
+        return;
+
+      }
+
+
       const {
         data: products,
         error
@@ -1314,7 +1702,8 @@
       }
 
 
-      productsGrid.innerHTML = "";
+      productsGrid.innerHTML =
+        "";
 
 
       products.forEach(
@@ -1435,6 +1824,38 @@
     try {
 
       const {
+        data: userData,
+        error: userError
+      } =
+      await supabaseClient.auth.getUser();
+
+
+      if (userError) {
+
+        throw userError;
+
+      }
+
+
+      const user =
+        userData.user;
+
+
+      if (
+        !user ||
+        !user.email ||
+        user.email.toLowerCase() !==
+        ADMIN_EMAIL.toLowerCase()
+      ) {
+
+        throw new Error(
+          "You are not authorized."
+        );
+
+      }
+
+
+      const {
         error
       } =
       await supabaseClient
@@ -1443,6 +1864,10 @@
         .eq(
           "id",
           productId
+        )
+        .eq(
+          "user_id",
+          user.id
         );
 
 
